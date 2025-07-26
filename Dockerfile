@@ -1,17 +1,9 @@
-# Use official OpenJDK image
-FROM openjdk:17-jdk-slim
-
-# Set working directory
+FROM maven:3.8.6-openjdk-17-slim AS build
 WORKDIR /app
-
-# Copy your entire project
 COPY . .
-
-# Build the project
+RUN chmod +x mvnw
 RUN ./mvnw package -DskipTests
 
-# Expose the port Spring Boot runs on
-EXPOSE 8080
-
-# Run the Spring Boot JAR
-CMD ["java", "-jar", "target/*.jar"]
+FROM openjdk:17-slim
+COPY --from=build /app/target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
